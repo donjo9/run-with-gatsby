@@ -18,21 +18,17 @@ module.exports = {
         icon: `src/images/gatsby-icon.png`, // This path is relative to the root of the site.
       },
     },
+    // Simple config, passing URL
     {
-        resolve: 'gatsby-source-filesystem',
-        options: {
-          name: 'queries',
-          path: `${__dirname}/src/queries/`,
-        },
+      resolve: "gatsby-source-graphql",
+      options: {
+        // Arbitrary name for the remote schema Query type
+        typeName: "RunWithAPI",
+        // Field under which the remote schema will be accessible. You'll use this in your Gatsby query
+        fieldName: "runwith",
+        // Url to query from
+        url: "https://run.with.johnni.ninja/api",
       },
-    {
-        resolve: '@wyze/gatsby-source-graphql',
-        options: {
-          url: 'https://run.with.johnni.ninja/api',
-        },
-      },
-    // this (optional) plugin enables Progressive Web App + Offline functionality
-    // To learn more, visit: https://gatsby.dev/offline
-    // `gatsby-plugin-offline`,
+    },
   ],
 }
