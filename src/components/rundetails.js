@@ -133,7 +133,7 @@ const RunDetails = ({ data }) => {
   const vb = `0 0 ${graphXMaxCount} ${graphYMaxValue}`
   return (
     <React.Fragment>
-      {data.getRun && <Run {...data.getRun} />}
+      {data.runwith.getRun && <Run {...data.runwith.getRun} />}
       <Lap>
         <LapData>Lap</LapData>
         <LapData>Tid</LapData>
