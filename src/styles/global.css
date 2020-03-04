@@ -2,6 +2,9 @@
     --background-color: #211f27;
     --shade-color: #34313d;
 }
+html {
+    overflow: auto;
+}
 body {
     width: 100vw;
     height: 100vh;
@@ -15,6 +18,7 @@ body {
         Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow:auto;
 }
 *,
 :after,
