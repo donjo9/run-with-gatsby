@@ -73,8 +73,8 @@ function SEO({ description, lang, meta, title }) {
 }
 
 SEO.defaultProps = {
-  lang: `en`,
-  meta: [],
+  lang: `da`,
+  meta: ['running','run','tracking','forerunner 30','garmin','johnni.ninja'],
   description: ``,
 }
 
