@@ -2,7 +2,7 @@ import React from "react"
 import { Link } from "gatsby"
 import Run from "../components/run"
 import styled from "styled-components"
-
+import "../styles/global.css"
 import SEO from "../components/seo"
 
 const Runs = styled.div`
@@ -33,9 +33,9 @@ export const query = graphql`
     }
   }
 `
-const RunList = ({data}) => {
+const RunList = ({ data }) => {
   return (
-      <Runs>
+    <Runs>
       <SEO />
       {data.runwith.getRuns &&
         data.runwith.getRuns
@@ -46,7 +46,6 @@ const RunList = ({data}) => {
             </RunLink>
           ))}
     </Runs>
-    
   )
 }
 
