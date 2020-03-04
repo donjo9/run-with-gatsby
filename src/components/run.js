@@ -22,8 +22,8 @@ const RunData = styled.div`
 const Run = props => {
     const start_tid = new Date(parseInt(props.start_time));
     const start_tid_string =
-        start_tid
-            .getHours()
+        (start_tid
+            .getUTCHours()+1)
             .toString()
             .padStart(2, 0) +
         ":" +
