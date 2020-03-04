@@ -2,7 +2,6 @@ import React from "react"
 import { Link } from "gatsby"
 import Run from "../components/run"
 import styled from "styled-components"
-import "../styles/global.css"
 import SEO from "../components/seo"
 
 const Runs = styled.div`
