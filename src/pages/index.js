@@ -3,6 +3,7 @@ import { Link } from "gatsby"
 import Run from "../components/run"
 import styled from "styled-components"
 import SEO from "../components/seo"
+import { graphql } from "gatsby"
 
 const Runs = styled.div`
   display: grid;
