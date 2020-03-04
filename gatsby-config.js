@@ -28,7 +28,7 @@ module.exports = {
         // Field under which the remote schema will be accessible. You'll use this in your Gatsby query
         fieldName: "runwith",
         // Url to query from
-        url: "https://run.with.johnni.ninja/api",
+        url: "https://api.run.with.johnni.ninja",
       },
     },
   ],
