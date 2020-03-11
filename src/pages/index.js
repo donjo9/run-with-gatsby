@@ -36,7 +36,7 @@ export const query = graphql`
 const RunList = ({ data }) => {
   return (
     <Runs>
-      <SEO />
+      <SEO title="Hjem"/>
       {data.runwith.getRuns &&
         data.runwith.getRuns
           .sort((a, b) => b.start_time - a.start_time)
