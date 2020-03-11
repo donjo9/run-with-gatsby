@@ -3,6 +3,7 @@ import { graphql } from "gatsby"
 import styled from "styled-components"
 import Run from "./run"
 import SEO from "./seo"
+import { formatDateTImeString } from "../utils/utils"
 
 const Lap = styled.div`
   padding: 0.25rem 0.6rem;
@@ -77,7 +78,6 @@ const RunDetails = ({ data }) => {
     const timeString = date.toISOString().substr(14, 5)
     return (
       <React.Fragment key={x.timestamp}>
-        <SEO />
         <LapData>{count + 1}</LapData>
         <LapData>{timeString}</LapData>
         <LapData>
@@ -131,9 +131,20 @@ const RunDetails = ({ data }) => {
       return `${acc} C ${cpsX},${cpsY} ${cpeX},${cpeY} ${cur[0]},${cur[1]}`
     }, "")
   const vb = `0 0 ${graphXMaxCount} ${graphYMaxValue}`
+
+  //
+    const start_tid_string = formatDateTImeString(data.runwith.getRun.start_time);
+    const date = new Date(null);
+    date.setSeconds(data.runwith.getRun.total_elapsed_time); // specify value for SECONDS here
+    const timeString = date.toISOString().substr(11, 8);
+    const distanceK = Math.floor(data.runwith.getRun.total_distance / 1000);
+    const distanceM = Math.round(data.runwith.getRun.total_distance % 1000);
+    const hastighed = Number(data.runwith.getRun.enhanced_avg_speed).toFixed(2);
+  //
   return (
     <React.Fragment>
-      {data.runwith.getRun && <Run {...data.runwith.getRun} />}
+      <SEO title={`Løb: ${start_tid_string}`} description={`Tid: ${timeString} - Dist. ${distanceK}km ${distanceM}m - Hastighed: ${hastighed}`}/>
+      {data.runwith.getRun && <Run start_tid_string={start_tid_string} timeString={timeString} distanceK={distanceK} distanceM={distanceM} total_calories={data.runwith.getRun.total_calories} hastighed={hastighed}/>}
       <Lap>
         <LapData>Lap</LapData>
         <LapData>Tid</LapData>
