@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { formatDateTImeString } from "../utils/utils";
 const RunCard = styled.div`
     display: flex;
     text-decoration: none;
@@ -20,29 +21,7 @@ const RunData = styled.div`
 `;
 
 const Run = props => {
-    const start_tid = new Date(parseInt(props.start_time));
-    const start_tid_string =
-        (start_tid
-            .getUTCHours()+1)
-            .toString()
-            .padStart(2, 0) +
-        ":" +
-        start_tid
-            .getMinutes()
-            .toString()
-            .padStart(2, 0) +
-        " - " +
-        start_tid
-            .getDate()
-            .toString()
-            .padStart(2, 0) +
-        "-" +
-        Number(start_tid
-            .getMonth()+1)
-            .toString()
-            .padStart(2, 0) +
-        "-" +
-        start_tid.getFullYear();
+    const start_tid_string = formatDateTImeString(props.start_time);
     const date = new Date(null);
     date.setSeconds(props.total_elapsed_time); // specify value for SECONDS here
     const timeString = date.toISOString().substr(11, 8);
