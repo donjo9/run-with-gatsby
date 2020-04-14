@@ -26,6 +26,10 @@
   "keywords": [
     "gatsby"
   ],
+  "resolutions": {
+    "**/apollo-link": "1.2.13",
+    "**/apollo-link-http": "1.5.16"
+  },
   "license": "MIT",
   "scripts": {
     "build": "gatsby build",

@@ -38,9 +38,11 @@ export const query = graphql`
           total_elapsed_time
           total_distance
           avg_speed
+          enhanced_avg_speed
         }
         path {
           speed
+          enhanced_speed
         }
       }
     }
@@ -84,7 +86,7 @@ const RunDetails = ({ data }) => {
           {Math.floor(x.total_distance / 1000)}km{" "}
           {Math.round(x.total_distance % 1000)}m
         </LapData>
-        <LapData>{Number(x.avg_speed / 1000).toFixed(2)} km/t</LapData>
+        <LapData>{Number(x.enhanced_avg_speed).toFixed(2)} km/t</LapData>
       </React.Fragment>
     )
   })
@@ -97,11 +99,11 @@ const RunDetails = ({ data }) => {
     if (i % reductionFactor !== 0) {
       return false
     }
-    if (x.speed > max) {
-      max = x.speed
+    if (x.enhanced_speed > max) {
+      max = x.enhanced_speed
     }
-    if (x.speed < min) {
-      min = x.speed
+    if (x.enhanced_speed < min) {
+      min = x.enhanced_speed
     }
     return true
   })
@@ -109,16 +111,16 @@ const RunDetails = ({ data }) => {
 
   //console.log(min, max)
   const graphXMaxCount = gqlpdata.length * 2
-  const graphValueMax = Math.ceil(max / 10000) * 100
+  const graphValueMax = Math.ceil(max) * 10
   const graphYMaxValue = (graphXMaxCount / 16) * 4
   const graphYFactor = graphYMaxValue / graphValueMax
-  //console.log(graphValueMax, graphXMaxCount, graphYFactor, graphYMaxValue)
+  console.log(graphValueMax, graphXMaxCount, graphYFactor, graphYMaxValue)
 
   const pathdata = gqlpdata
     .map((d, i) => {
       return [
         i * 2,
-        graphYMaxValue - Math.round(d.speed / 100).toFixed(2) * graphYFactor,
+        graphYMaxValue - Math.round(d.enhanced_speed * 10).toFixed(2) * graphYFactor,
       ]
     })
     .reduce((acc, cur, i, a) => {
