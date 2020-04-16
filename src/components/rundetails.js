@@ -4,6 +4,7 @@ import styled from "styled-components"
 import Run from "./run"
 import SEO from "./seo"
 import { formatDateTImeString } from "../utils/utils"
+import { LineChart, Line as ReLine, XAxis, YAxis, Tooltip} from 'recharts';
 
 const Lap = styled.div`
   padding: 0.25rem 0.6rem;
@@ -43,34 +44,30 @@ export const query = graphql`
         path {
           speed
           enhanced_speed
+          timestamp
+          distance
         }
       }
     }
   }
 `
+const TooltipContainer = styled.div`
+  background-color: rgba(52, 49, 61, 0.75);
+  padding: 5px;
+`
 
-const line = (pointA, pointB) => {
-  const lengthX = pointB[0] - pointA[0]
-  const lengthY = pointB[1] - pointA[1]
-  return {
-    length: Math.sqrt(Math.pow(lengthX, 2) + Math.pow(lengthY, 2)),
-    angle: Math.atan2(lengthY, lengthX),
+
+function CustomTooltip({ payload, label, active, zero }) {
+  if (active) {
+    return (
+      <TooltipContainer>
+        <div>{`Tid: ${label.toFixed(2)} `}km</div>
+        <div>{`Dist: ${payload[0].value.toFixed(2)} `}km/t</div>
+      </TooltipContainer>
+    );
   }
-}
 
-const controlPoint = (current, previous, next, reverse) => {
-  // When 'current' is the first or last point of the array
-  // 'previous' or 'next' don't exist.
-  // Replace with 'current'
-  const p = previous || current
-  const n = next || current // The smoothing ratio
-  const smoothing = 0.2 // Properties of the opposed-line
-  const o = line(p, n) // If is end-control-point, add PI to the angle to go backward
-  const angle = o.angle + (reverse ? Math.PI : 0)
-  const length = o.length * smoothing // The control point position is relative to the current point
-  const x = current[0] + Math.cos(angle) * length
-  const y = Number.parseFloat(current[1]) + Math.sin(angle) * length
-  return [x, y]
+  return null;
 }
 
 const RunDetails = ({ data }) => {
@@ -91,49 +88,18 @@ const RunDetails = ({ data }) => {
     )
   })
 
-  let max = 0
-  let min = 99999
   const reductionFactor = Math.ceil(data.runwith.getRun.path.length / 800)
-  //console.log(reductionFactor)
-  const gqlpdata = data.runwith.getRun.path.filter((x, i) => {
+
+  const rechartdata = data.runwith.getRun.path.filter((x, i) => {
     if (i % reductionFactor !== 0) {
       return false
     }
-    if (x.enhanced_speed > max) {
-      max = x.enhanced_speed
-    }
-    if (x.enhanced_speed < min) {
-      min = x.enhanced_speed
-    }
     return true
-  })
-  //console.log(data.runwith.getRun.path.length)
-
-  //console.log(min, max)
-  const graphXMaxCount = gqlpdata.length * 2
-  const graphValueMax = Math.ceil(max) * 10
-  const graphYMaxValue = (graphXMaxCount / 16) * 4
-  const graphYFactor = graphYMaxValue / graphValueMax
-  console.log(graphValueMax, graphXMaxCount, graphYFactor, graphYMaxValue)
-
-  const pathdata = gqlpdata
-    .map((d, i) => {
-      return [
-        i * 2,
-        graphYMaxValue - Math.round(d.enhanced_speed * 10).toFixed(2) * graphYFactor,
-      ]
-    })
-    .reduce((acc, cur, i, a) => {
-      if (i === 0) {
-        return `M ${cur[0]},${cur[1]}`
-      }
-
-      const [cpsX, cpsY] = controlPoint(a[i - 1], a[i - 2], cur) // end control point
-      const [cpeX, cpeY] = controlPoint(cur, a[i - 1], a[i + 1], true)
-      return `${acc} C ${cpsX},${cpsY} ${cpeX},${cpeY} ${cur[0]},${cur[1]}`
-    }, "")
-  const vb = `0 0 ${graphXMaxCount} ${graphYMaxValue}`
-
+  }).map((x,i) => {
+    const speed = Math.floor(x.enhanced_speed * 100) / 100;
+    const distance = Math.floor(x.distance * 100) / 100;
+    return {distance, speed}
+  });
   //
     const start_tid_string = formatDateTImeString(data.runwith.getRun.start_time);
     const date = new Date(null);
@@ -143,6 +109,12 @@ const RunDetails = ({ data }) => {
     const distanceM = Math.round(data.runwith.getRun.total_distance % 1000);
     const hastighed = Number(data.runwith.getRun.enhanced_avg_speed).toFixed(2);
   //
+
+  let xticks = [];
+  for(let i=0; i<= distanceK+0.5; i+=0.5) {
+    xticks.push(i);
+  }
+  console.log(xticks);
   return (
     <React.Fragment>
       <SEO title={`Løb: ${start_tid_string}`} description={`Tid: ${timeString} - Dist. ${distanceK}km ${distanceM}m - Hastighed: ${hastighed}`}/>
@@ -154,36 +126,12 @@ const RunDetails = ({ data }) => {
         <LapData>Hast.</LapData>
         {laps}
       </Lap>
-      <div
-        style={{ width: "100%", maxWidth: "800px", padding: "0.25rem 0.6rem" }}
-      >
-        <svg viewBox={vb} preserveAspectRatio="xMinYMid meet">
-          <g>
-            <path
-              d={pathdata}
-              fill="none"
-              stroke="white"
-              strokeWidth={reductionFactor / 2}
-            ></path>
-          </g>
-          <line
-            x1="0"
-            y1={graphYMaxValue}
-            x2={graphXMaxCount}
-            y2={graphYMaxValue}
-            stroke="white"
-            strokeWidth={reductionFactor}
-          />
-          <line
-            x1="0"
-            y1="0"
-            x2="0"
-            y2={graphYMaxValue}
-            stroke="white"
-            strokeWidth={reductionFactor}
-          />
-        </svg>
-      </div>
+      <LineChart width={800} height={400} data={rechartdata}>
+        <ReLine type="natural" dataKey="speed" stroke="#8884d8" dot={false} />
+        <Tooltip content={<CustomTooltip zero="0"/>} animationDuration="250" />
+        <XAxis dataKey="distance" ticks={xticks} unit="km"/>
+        <YAxis unit="km/t"/>
+      </LineChart>
     </React.Fragment>
   )
 }
