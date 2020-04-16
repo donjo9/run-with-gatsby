@@ -61,8 +61,8 @@ function CustomTooltip({ payload, label, active, zero }) {
   if (active) {
     return (
       <TooltipContainer>
-        <div>{`Tid: ${label.toFixed(2)} `}km</div>
-        <div>{`Dist: ${payload[0].value.toFixed(2)} `}km/t</div>
+        <div>{`Dist.: ${label.toFixed(2)} `}km</div>
+        <div>{`Hast.: ${payload[0].value.toFixed(2)} `}km/t</div>
       </TooltipContainer>
     );
   }
