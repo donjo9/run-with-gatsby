@@ -4,7 +4,13 @@ import styled from "styled-components"
 import Run from "./run"
 import SEO from "./seo"
 import { formatDateTImeString } from "../utils/utils"
-import { LineChart, Line as ReLine, XAxis, YAxis, Tooltip} from 'recharts';
+import {
+  ResponsiveLineCanvas,
+  ResponsiveLine,
+  Line,
+  LineCanvas,
+} from "@nivo/line"
+//import { LineChart, Line as ReLine, XAxis, YAxis, Tooltip} from 'recharts';
 
 const Lap = styled.div`
   padding: 0.25rem 0.6rem;
@@ -55,19 +61,116 @@ const TooltipContainer = styled.div`
   background-color: rgba(52, 49, 61, 0.75);
   padding: 5px;
 `
+const defaultTheme = {
+  background: "transparent",
+  fontFamily: "sans-serif",
+  fontSize: 11,
+  textColor: "#fff",
+  axis: {
+    domain: {
+      line: {
+        stroke: "transparent",
+        strokeWidth: 1,
+      },
+    },
+    ticks: {
+      line: {
+        stroke: "#777777",
+        strokeWidth: 1,
+      },
+      text: {},
+    },
+    legend: {
+      text: {
+        fontSize: 12,
+      },
+    },
+  },
+  grid: {
+    line: {
+      stroke: "var(--shade-color)",
+      strokeWidth: 1,
+    },
+  },
+  legends: {
+    text: {
+      fill: "#333333",
+    },
+  },
+  labels: {
+    text: {},
+  },
+  markers: {
+    lineColor: "white",
+    lineStrokeWidth: 1,
+    text: {},
+  },
+  dots: {
+    text: {},
+  },
+  tooltip: {
+    container: {
+      background: "white",
+      color: "inherit",
+      fontSize: "inherit",
+      borderRadius: "2px",
+      boxShadow: "0 1px 2px rgba(0, 0, 0, 0.25)",
+      padding: "5px 9px",
+    },
+    basic: {
+      whiteSpace: "pre",
+      display: "flex",
+      alignItems: "center",
+    },
+    chip: {
+      marginRight: 7,
+    },
+    table: {},
+    tableCell: {
+      padding: "3px 5px",
+    },
+  },
+  crosshair: {
+    line: {
+      stroke: "#f5f5f5",
+      strokeWidth: 1,
+      strokeOpacity: 0.75,
+      strokeDasharray: "6 6",
+    },
+  },
+  annotations: {
+    text: {
+      fontSize: 13,
+      outlineWidth: 2,
+      outlineColor: "#ffffff",
+    },
+    link: {
+      stroke: "#000000",
+      strokeWidth: 1,
+      outlineWidth: 2,
+      outlineColor: "#ffffff",
+    },
+    outline: {
+      fill: "none",
+      stroke: "#000000",
+      strokeWidth: 2,
+      outlineWidth: 2,
+      outlineColor: "#ffffff",
+    },
+    symbol: {
+      fill: "#000000",
+      outlineWidth: 2,
+      outlineColor: "#ffffff",
+    },
+  },
+}
 
-
-function CustomTooltip({ payload, label, active, zero }) {
-  if (active) {
-    return (
-      <TooltipContainer>
-        <div>{`Dist.: ${label.toFixed(2)} `}km</div>
-        <div>{`Hast.: ${payload[0].value.toFixed(2)} `}km/t</div>
-      </TooltipContainer>
-    );
-  }
-
-  return null;
+const commonProperties = {
+  width: 900,
+  height: 400,
+  margin: { top: 20, right: 20, bottom: 60, left: 80 },
+  animate: true,
+  enableSlices: "x",
 }
 
 const RunDetails = ({ data }) => {
@@ -90,35 +193,55 @@ const RunDetails = ({ data }) => {
 
   const reductionFactor = Math.ceil(data.runwith.getRun.path.length / 800)
 
-  const rechartdata = data.runwith.getRun.path.filter((x, i) => {
-    if (i % reductionFactor !== 0) {
-      return false
-    }
-    return true
-  }).map((x,i) => {
-    const speed = Math.floor(x.enhanced_speed * 100) / 100;
-    const distance = Math.floor(x.distance * 100) / 100;
-    return {distance, speed}
-  });
+  const rechartdata = [
+    {
+      id: "japan",
+      color: "hsl(127, 70%, 50%)",
+      data: data.runwith.getRun.path
+        .filter((x, i) => {
+          if (i % reductionFactor !== 0) {
+            return false
+          }
+          return true
+        })
+        .map((x, i) => {
+          const speed = Math.floor(x.enhanced_speed * 100) / 100
+          const distance = Math.floor(x.distance * 100) / 100
+          return { x: distance, y: speed }
+        }),
+    },
+  ]
   //
-    const start_tid_string = formatDateTImeString(data.runwith.getRun.start_time);
-    const date = new Date(null);
-    date.setSeconds(data.runwith.getRun.total_elapsed_time); // specify value for SECONDS here
-    const timeString = date.toISOString().substr(11, 8);
-    const distanceK = Math.floor(data.runwith.getRun.total_distance / 1000);
-    const distanceM = Math.round(data.runwith.getRun.total_distance % 1000);
-    const hastighed = Number(data.runwith.getRun.enhanced_avg_speed).toFixed(2);
+  const start_tid_string = formatDateTImeString(data.runwith.getRun.start_time)
+  const date = new Date(null)
+  date.setSeconds(data.runwith.getRun.total_elapsed_time) // specify value for SECONDS here
+  const timeString = date.toISOString().substr(11, 8)
+  const distanceK = Math.floor(data.runwith.getRun.total_distance / 1000)
+  const distanceM = Math.round(data.runwith.getRun.total_distance % 1000)
+  const hastighed = Number(data.runwith.getRun.enhanced_avg_speed).toFixed(2)
   //
 
-  let xticks = [];
-  for(let i=0; i<= distanceK+0.5; i+=0.5) {
-    xticks.push(i);
+  let xticks = []
+  for (let i = 0; i <= distanceK; i++) {
+    xticks.push(i)
   }
-  console.log(xticks);
+  console.log(xticks)
   return (
     <React.Fragment>
-      <SEO title={`Løb: ${start_tid_string}`} description={`Tid: ${timeString} - Dist. ${distanceK}km ${distanceM}m - Hastighed: ${hastighed}`}/>
-      {data.runwith.getRun && <Run start_tid_string={start_tid_string} timeString={timeString} distanceK={distanceK} distanceM={distanceM} total_calories={data.runwith.getRun.total_calories} hastighed={hastighed}/>}
+      <SEO
+        title={`Løb: ${start_tid_string}`}
+        description={`Tid: ${timeString} - Dist. ${distanceK}km ${distanceM}m - Hastighed: ${hastighed}`}
+      />
+      {data.runwith.getRun && (
+        <Run
+          start_tid_string={start_tid_string}
+          timeString={timeString}
+          distanceK={distanceK}
+          distanceM={distanceM}
+          total_calories={data.runwith.getRun.total_calories}
+          hastighed={hastighed}
+        />
+      )}
       <Lap>
         <LapData>Lap</LapData>
         <LapData>Tid</LapData>
@@ -126,12 +249,48 @@ const RunDetails = ({ data }) => {
         <LapData>Hast.</LapData>
         {laps}
       </Lap>
-      <LineChart width={800} height={400} data={rechartdata}>
-        <ReLine type="natural" dataKey="speed" stroke="#8884d8" dot={false} />
-        <Tooltip content={<CustomTooltip zero="0"/>} animationDuration="250" />
-        <XAxis dataKey="distance" ticks={xticks} unit="km"/>
-        <YAxis unit="km/t"/>
-      </LineChart>
+      <div style={{ width: "100vw", maxWidth: "800px", height: "400px" }}>
+        <ResponsiveLine
+          colors="#685f82"
+          theme={defaultTheme}
+          enablePoints={false}
+          margin={{ top: 50, right: 110, bottom: 100, left: 80 }}
+          data={rechartdata}
+          enableGridY={false}
+          enableGridX={true}
+          gridXValues={xticks}
+          enableSlices="x"
+          isInteractive={true}
+          sliceTooltip={({ slice }) => {
+            return (
+              <TooltipContainer>
+              <div>{`Dist.: ${slice.points[0].data.xFormatted.toFixed(2)} `}km</div>
+              <div>{`Hast.: ${slice.points[0].data.yFormatted.toFixed(2)} `}km/t</div>
+            </TooltipContainer>
+            )
+          }}
+          axisLeft={{
+            tickSize: 5,
+            tickPadding: 5,
+            tickRotation: 0,
+            format: value => `${value} km/t`,
+            legend: "Hastighed",
+            legendOffset: -60,
+            legendPosition: "middle",
+          }}
+          axisBottom={{
+            scale: "linaer",
+            tickValues: xticks,
+            format: value => `${value} km`,
+            tickSize: 5,
+            tickPadding: 5,
+            tickRotation: 0,
+            legend: "Distance",
+            legendOffset: 36,
+            legendPosition: "middle",
+          }}
+        />
+      </div>
     </React.Fragment>
   )
 }
