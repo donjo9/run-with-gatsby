@@ -256,9 +256,10 @@ const RunDetails = ({ data }) => {
           enablePoints={false}
           margin={{ top: 50, right: 110, bottom: 100, left: 80 }}
           data={rechartdata}
-          enableGridY={false}
+          enableGridY={true}
           enableGridX={true}
           gridXValues={xticks}
+          gridYValues={[0]}
           enableSlices="x"
           isInteractive={true}
           sliceTooltip={({ slice }) => {
